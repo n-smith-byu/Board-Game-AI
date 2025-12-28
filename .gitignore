@@ -1,8 +1,10 @@
 .venv/
+.vscode/
+.ipynb_checkpoints/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 *.pth
 
-test/
+poetry.lock
