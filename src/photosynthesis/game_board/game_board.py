@@ -3,7 +3,7 @@ from .Store import PlayerStore
 from .Trees import Tree
 from .Points import PointsBank
 from .Exceptions import *
-from src.Photosynthesis.ActionTypes import BuyTree, PlantSeed, GrowTree, HarvestTree, PassTurn
+from ..actions import BuyTree, PlantSeed, GrowTree, HarvestTree, PassTurn
 
 from collections import defaultdict
 import numpy as np

@@ -1,5 +1,5 @@
 from .game_board import GameBoard
-from src.Photosynthesis.ActionTypes import InitialPlacement
+from ..actions import InitialPlacement
 
 class BoardSummary:
     def __init__(self, player_num, game_board:GameBoard, remaining_turns:int,

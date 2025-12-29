@@ -1,5 +1,5 @@
 from ._action import Action
-from ..GameBoard.Trees import Tree
+from ..game_board.trees import Tree
 
 class PlantSeed(Action):
     def __init__(self, player_num, parent_tree:Tree, board_space:tuple):

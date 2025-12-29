@@ -1,9 +1,5 @@
-from torch_geometric.nn import GCNConv
-from torch_geometric.data import Data
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
 
 class GraphCNN(nn.Module):
     def __init__(self, in_dim, out_dim):

@@ -1,5 +1,5 @@
-from src.Photosynthesis.GameBoard.Trees import Tree
-from src.Photosynthesis.GameBoard.Exceptions import OutOfStockException
+from ..trees import Tree
+from ..exceptions import OutOfStockException
 
 class PlayerInventory:
     def __init__(self, player_num):

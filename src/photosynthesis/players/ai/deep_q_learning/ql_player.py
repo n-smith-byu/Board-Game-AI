@@ -6,8 +6,6 @@ from tqdm import tqdm
 
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.functional as F
 import torch.nn.init as init
 from torch.optim import Adam
 
@@ -129,6 +127,16 @@ class PhotosynthesisRLPlayer(AIPlayer):
         return self.ones.clone(), self.twos.clone(), self.threes.clone()
 
     def map_action_to_vec(self, action):
+        """
+        Takes an action as input and creates a vector representing that action to pass into the Q model. 
+
+        Uses a one-hot encoding to describe the kind of action,
+        then two additonal one-hot encodings; one to describe which board space 
+        the action is being applied from (e.g the parent tree) and which board space 
+        the action is being applied to (e.g. where the seed is being planted), if
+        applicable. 
+
+        """
         board_space_map = self.map_board_spaces()
         buy_actions = torch.zeros((4,))
         grow_harvest_plant_actions = torch.zeros((37,2))
@@ -252,7 +260,7 @@ class PhotosynthesisRLPlayer(AIPlayer):
         self.training = False
 
 
-    def choose_move(self, state:BoardSummary):
+    def choose_move(self, state: BoardSummary):
         X = torch.stack([self.map_action_to_vec(action) \
                              for action in state.available_actions])    # batch actions together
         

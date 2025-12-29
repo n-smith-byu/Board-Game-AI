@@ -1,6 +1,6 @@
 from typing import Type
-from ..PlayerTypes import AIPlayer, HumanPlayer
-from src.Photosynthesis.GameBoard import *
+from ..players import AIPlayer, HumanPlayer
+from ..game_board import GameBoard
 from ..ActionTypes import BuyTree, PlantSeed, GrowTree, HarvestTree, PassTurn, InitialPlacement
 from src import BoardGame
 import numpy as np

@@ -1,5 +1,5 @@
 from ._action import Action
-from src.Photosynthesis.GameBoard.Trees import Tree
+from ..game_board import Tree
 
 class HarvestTree(Action):
     def __init__(self, player_num, tree:Tree):

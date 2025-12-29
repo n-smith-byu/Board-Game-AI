@@ -1,7 +1,9 @@
-import numpy as np
+from ..exceptions import OutOfStockException
+from ..trees import Tree
+
 from collections import defaultdict
-from src.Photosynthesis.GameBoard.Exceptions import OutOfStockException
-from src.Photosynthesis.GameBoard.Trees import Tree
+
+import numpy as np
 
 class PlayerStore:
     def __init__(self, player_num):

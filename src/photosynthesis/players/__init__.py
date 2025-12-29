@@ -1,5 +1,6 @@
-from .ai.reinforcement_learning import RLPlayer
-from .human_player import HumanPlayer as HumanPlayer
-from .ai.random_player import RandomPlayer as RandomPlayer
+from .ai.deep_q_learning import RLPlayer
+from .human_player import PhotosynthesisHumanPlayer as HumanPlayer
+from .ai.random_player import PhotosynthesisRandomPlayer as RandomPlayer
+from .ai.deep_q_learning import RLPlayer
 
 __all__ = ['AIPlayer', 'HumanPlayer', 'RandomPlayer']

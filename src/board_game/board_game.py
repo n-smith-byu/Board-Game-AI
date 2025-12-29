@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from .Players import Player, AIPlayer, HumanPlayer
-from .Exceptions.exceptions import TooManyPlayersException
+from .players import Player, AIPlayer, HumanPlayer
+from .exceptions import TooManyPlayersException
 
 from typing import Type
 
@@ -25,6 +25,8 @@ class BoardGame(ABC):
     @abstractmethod
     def get_human_player_class(cls) -> Type[HumanPlayer]:
         raise NotImplementedError()
+    
+    # - - - - - 
     
     def __init__(self, players=None):
         if players is None:

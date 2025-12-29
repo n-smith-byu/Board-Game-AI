@@ -1,10 +1,9 @@
-from ..Players import Player, HumanPlayer, AIPlayer
-from ..board_game import BoardGame
-from ..Exceptions import NotEnoughPlayersException, TooManyPlayersException
+from .players import Player, HumanPlayer, AIPlayer
+from .board_game import BoardGame
+from .exceptions import NotEnoughPlayersException, TooManyPlayersException
 
-from typing import Type
-import random
 import uuid
+from typing import Type
 
 
 class WaitingRoom:

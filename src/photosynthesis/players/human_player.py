@@ -1,5 +1,5 @@
-from src.BoardGame.Players import HumanPlayer
-from src.Photosynthesis.GameBoard import BoardSummary
+from ...board_game import HumanPlayer
+from ..game_board import BoardSummary
 
 class PhotosynthesisHumanPlayer(HumanPlayer):
     def __init__(self, player_name=None):
