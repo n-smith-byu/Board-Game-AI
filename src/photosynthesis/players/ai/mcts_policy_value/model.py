@@ -17,3 +17,38 @@ class GraphCNN(nn.Module):
         new_features = self.W(conv) + self.W_self(X)
 
         return new_features
+    
+class PhotoynthesisValuePolicyModel(torch.Module):
+
+    def __init__(self, in_channels):
+        super().__init__()
+
+        _feature_size = 128
+
+        self.board_gcn_1 = GraphCNN(in_dim=in_channels, out_dim=_feature_size)
+        self.board_gcn_2 = GraphCNN(in_dim=_feature_size, out_dim=_feature_size)
+        self.board_gcn_3 = GraphCNN(in_dim=_feature_size, out_dim=_feature_size)
+        self.board_gcn_4 = GraphCNN(in_dim=_feature_size, out_dim=_feature_size)
+        self.board_gcn_5 = GraphCNN(in_dim=_feature_size, out_dim=_feature_size)
+
+        self.value_1 = nn.Linear(in_features=_feature_size, out_features=_feature_size)
+        self.value_2 = nn.Linear(in_features=_feature_size, out_features=32)
+        self.value_out = nn.Linear(in_features=_feature_size, out_features=1)
+
+        self.policy_1 = nn.Linear(in_features=_feature_size, out_features=_feature_size)
+        self.policy_2 = nn.Linear(in_features=_feature_size, out_features=_feature_size)
+        self.policy_out = nn.Linear(in_features=_feature_size, out_features=_feature_size)
+
+        self.sigma = nn.ReLU()
+
+    def forward(self, board, adj_mat):
+        x = self.board_gcn_1(board, adj_mat)
+        x = self.sigma(x)
+        x2 = self.board_gcn_2(board, adj_mat)
+        x2 = self.sigma(x2)
+        x3 = self.board_gcn_3(board, adj_mat)
+        x3 = self.sigma(x3)
+
+        val = self.linear(x3)
+
+        return policy, val

@@ -1,7 +1,7 @@
 from .game_board import GameBoard
-from .condensed_board import BoardSummary
+from ..game.game_state import PlayerGameState
 from .trees import Tree
 from .store import PlayerStore
 from .inventory import PlayerInventory
 
-__all__ = ['GameBoard', 'BoardSummary', 'PlayerInventory', 'PlayerStore', 'Tree']
+__all__ = ['GameBoard', 'PlayerGameState', 'PlayerInventory', 'PlayerStore', 'Tree']

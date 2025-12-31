@@ -33,9 +33,22 @@ class BoardGame(ABC):
             self._players: list[Player] = []
         else:
             self._players = players
+
+        self._bots = [p for p in self._players if isinstance(p, AIPlayer)]
+        self._humans = [p for p in self._players if isinstance(p, HumanPlayer)]
     
     def add_players(self, players: list[Player]):
         if len(players) > BoardGame.get_max_num_players():
             raise TooManyPlayersException(BoardGame.get_max_num_players())
+        
+    def get_num_players(self):
+        return len(self._players)
+    
+    def get_num_bots(self):
+        return len(self._bots)
+    
+    def get_num_humans(self):
+        return len(self._humans)
+
         
         

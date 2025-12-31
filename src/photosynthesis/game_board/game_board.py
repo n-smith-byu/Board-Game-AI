@@ -1,8 +1,8 @@
-from .Inventory import PlayerInventory
-from .Store import PlayerStore
-from .Trees import Tree
-from .Points import PointsBank
-from .Exceptions import *
+from .inventory import PlayerInventory
+from .store import PlayerStore
+from .trees import Tree
+from .points import PointsBank
+from .exceptions import *
 from ..actions import BuyTree, PlantSeed, GrowTree, HarvestTree, PassTurn
 
 from collections import defaultdict
@@ -46,58 +46,58 @@ class GameBoard:
                          [ 0, 1]])
 
     def __init__(self, num_players):
-        self.__num_players = num_players
+        self._num_players = num_players
         self.reset()
-        self.__valid_board_spaces = {(i,j) for i in range(self.__board_height) for j in range(self.__board_width) \
-                                     if self.__tree_board[i,j] > -np.inf}
+        self._valid_board_spaces = {(i,j) for i in range(self._board_height) for j in range(self._board_width) \
+                                     if self._tree_board[i,j] > -np.inf}
 
 
     def reset(self):
-        self.__tree_board = GameBoard.get_empty_board()
-        self.__player_board = GameBoard.get_empty_board()
-        self.__points_bank = PointsBank()
-        self.__trees:set[Tree] = set()        # set of all trees on the board
-        self.__sun_position = -1
+        self._tree_board = GameBoard.get_empty_board()
+        self._player_board = GameBoard.get_empty_board()
+        self._points_bank = PointsBank()
+        self._trees:set[Tree] = set()        # set of all trees on the board
+        self._sun_position = -1
 
-        self.__board_height = self.__tree_board.shape[0]
-        self.__board_width = self.__tree_board.shape[1]
+        self._board_height = self._tree_board.shape[0]
+        self._board_width = self._tree_board.shape[1]
 
-        self.__soil_richness = GameBoard.get_soil_richness()
+        self._soil_richness = GameBoard.get_soil_richness()
 
-        self.__players = defaultdict(dict)
-        for player_ind in range(self.__num_players):
-            self.__players[player_ind]['inventory'] = PlayerInventory(player_ind)
-            self.__players[player_ind]['store'] = PlayerStore(player_ind)
-            self.__players[player_ind]['suns'] = 0
-            self.__players[player_ind]['points'] = 0
-            self.__players[player_ind]['new_suns'] = 0
+        self._players = defaultdict(dict)
+        for player_ind in range(self._num_players):
+            self._players[player_ind]['inventory'] = PlayerInventory(player_ind)
+            self._players[player_ind]['store'] = PlayerStore(player_ind)
+            self._players[player_ind]['suns'] = 0
+            self._players[player_ind]['points'] = 0
+            self._players[player_ind]['new_suns'] = 0
     
     def get_valid_seed_positions(self, tree:Tree):
-        if tree not in self.__trees:
+        if tree not in self._trees:
             raise ValueError('Tree does not exist on board')
         if tree.grown_this_turn():
             return set()
         
         valid_seed_positions = set()
-        self.__find_valid_seed_positions(curr_position=tree.position,
+        self._find_valid_seed_positions(curr_position=tree.position,
                                          curr_distance=0,
                                          tree_size=tree.size,
                                          valid_seed_positions=valid_seed_positions)
         return valid_seed_positions
 
-    def __find_valid_seed_positions(self, curr_position, curr_distance, tree_size, 
+    def _find_valid_seed_positions(self, curr_position, curr_distance, tree_size, 
                                     valid_seed_positions:set):
-        if curr_position not in self.__valid_board_spaces:
+        if curr_position not in self._valid_board_spaces:
             return
 
-        if self.__tree_board[*curr_position] == -1:
+        if self._tree_board[*curr_position] == -1:
             valid_seed_positions.add(curr_position)
 
         if curr_distance == tree_size:
             return
         for direction in GameBoard.get_sun_direction_vecs():
             new_position = tuple(int(x) for x in (np.array(curr_position) + direction))
-            self.__find_valid_seed_positions(curr_position=new_position, 
+            self._find_valid_seed_positions(curr_position=new_position, 
                                              curr_distance=curr_distance + 1,
                                              tree_size=tree_size,
                                              valid_seed_positions=valid_seed_positions)
@@ -106,7 +106,7 @@ class GameBoard:
         if sizes is None:
             sizes = {0,1,2,3}
 
-        return {tree for tree in self.__trees if tree.player == player_num \
+        return {tree for tree in self._trees if tree.player == player_num \
                      and tree.size in sizes \
                      and not tree.grown_this_turn()}
         
@@ -115,64 +115,64 @@ class GameBoard:
         sun_direction = self.get_sun_direction_vec()
         for num_spaces_away in [1,2,3]:
             neighbor_space = tuple(this_tree_pos - num_spaces_away*sun_direction)
-            if neighbor_space not in self.__valid_board_spaces:
+            if neighbor_space not in self._valid_board_spaces:
                 break
 
-            neighbor_tree_size = self.__tree_board[*neighbor_space]
+            neighbor_tree_size = self._tree_board[*neighbor_space]
             if neighbor_tree_size >= num_spaces_away and neighbor_tree_size >= tree.size:
                 return True
             
         return False
     
-    def __collect_suns(self):
-        for player in self.__players:
-            self.__players[player]['new_suns'] = 0
+    def _collect_suns(self):
+        for player in self._players:
+            self._players[player]['new_suns'] = 0
 
         tree: Tree = None
-        for tree in self.__trees:
+        for tree in self._trees:
             if not self.tree_in_shadow(tree):
-                self.__players[tree.player]['new_suns'] += tree.size
-                new_sun_count = self.__players[tree.player]['suns'] + tree.size
-                self.__players[tree.player]['suns'] = min(new_sun_count, 20)
+                self._players[tree.player]['new_suns'] += tree.size
+                new_sun_count = self._players[tree.player]['suns'] + tree.size
+                self._players[tree.player]['suns'] = min(new_sun_count, 20)
 
     def get_open_board_spaces(self):
-        return [board_space for board_space in self.__valid_board_spaces \
-                if self.__tree_board[*board_space] == -1]
+        return [board_space for board_space in self._valid_board_spaces \
+                if self._tree_board[*board_space] == -1]
 
     def get_valid_board_spaces(self):
-        return {board_space for board_space in self.__valid_board_spaces}
+        return {board_space for board_space in self._valid_board_spaces}
 
     def is_valid_board_space(self, pos):
-        return tuple(pos) in self.__valid_board_spaces
+        return tuple(pos) in self._valid_board_spaces
 
     def rotate_sun(self):
-        self.__sun_position = (self.__sun_position + 1) % 6
+        self._sun_position = (self._sun_position + 1) % 6
 
-        for tree in self.__trees:
+        for tree in self._trees:
             tree.clear_grown_flag()
 
-        self.__collect_suns()
+        self._collect_suns()
 
-    def __add_tree(self, tree:Tree, pos):
-        if pos not in self.__valid_board_spaces:
-            raise InvalidBoardSpaceException(pos, self.__valid_board_spaces)
+    def _add_tree(self, tree:Tree, pos):
+        if pos not in self._valid_board_spaces:
+            raise InvalidBoardSpaceException(pos, self._valid_board_spaces)
         
-        if self.__tree_board[*pos] > -1:
+        if self._tree_board[*pos] > -1:
             message = f'Cannot place a tree at position {pos} because it is already occupied by another tree.'
             raise SpaceUnavailableException(message)
         
-        self.__tree_board[*pos] = tree.size
-        self.__player_board[*pos] = tree.player
+        self._tree_board[*pos] = tree.size
+        self._player_board[*pos] = tree.player
         tree.set_position(pos)
-        self.__trees.add(tree)
+        self._trees.add(tree)
 
-    def __remove_tree(self, tree:Tree):
-        if tree in self.__trees:
+    def _remove_tree(self, tree:Tree):
+        if tree in self._trees:
             position = tree.position
-            self.__trees.remove(tree)
-            self.__players[tree.player]['store'].restock_tree(tree)
-            self.__tree_board[*position] = -1
-            self.__player_board[*position] = -1
+            self._trees.remove(tree)
+            self._players[tree.player]['store'].restock_tree(tree)
+            self._tree_board[*position] = -1
+            self._player_board[*position] = -1
 
             tree.clear_position()
             tree.clear_grown_flag()
@@ -188,10 +188,10 @@ class GameBoard:
 
     def get_possible_actions(self, player_num):
         possible_actions = set()
-        player = self.__players[player_num]
+        player = self._players[player_num]
 
         # get actions involving trees
-        player_trees = {tree for tree in self.__trees if tree.player is player_num}
+        player_trees = {tree for tree in self._trees if tree.player is player_num}
         for tree in player_trees:
             # check growing/harvesting
             if tree.size < 3:
@@ -226,44 +226,65 @@ class GameBoard:
     # Get Board Info #
     # --------------- #
     def get_sun_pos(self):
-        return self.__sun_position
+        return self._sun_position
     
     def get_sun_direction_vec(self):
-        return GameBoard.get_sun_direction_vecs()[self.__sun_position]
+        return GameBoard.get_sun_direction_vecs()[self._sun_position]
     
     def get_player_board(self):
-        return self.__player_board.copy()
+        return self._player_board.copy()
 
     def get_tree_board(self):
-        return self.__tree_board.copy()
+        return self._tree_board.copy()
     
     def get_remaining_points(self):
-        return self.__points_bank.remaining_points
+        return self._points_bank.remaining_points
 
     # --------------- #
     # Get Player Info #
     # --------------- #
     def get_player_scores(self):
-        scores = [0]*self.__num_players
-        for player in self.__players:
-            scores[player] = self.__players[player]['points']
+        scores = [0]*self._num_players
+        for player in self._players:
+            scores[player] = self._players[player]['points']
         
         return scores
     
     def get_player_score(self, player):
-        return self.__players[player]['points']
+        return self._players[player]['points']
+    
+    def get_player_inventories(self):
+        inventories = {}
+        for player_ind, state in self._players.items():
+            inventory: PlayerInventory = state['inventory']
+            inventories[player_ind] = {}
+            for size in [0,1,2,3]:
+                inventories[player_ind][size] = inventory.num_available_trees(size)
+
+        return inventories
+    
+    def get_player_stores(self):
+        stores = {}
+        for player_ind, state in self._players.items():
+            store: PlayerStore= state['inventory']
+            stores[player_ind] = {}
+            for size in [0,1,2,3]:
+                stores[player_ind][size] = store.get_num_available(size)
+
+        return stores
     
     def get_player_suns(self, player):
-        return self.__players[player]['suns']
+        return self._players[player]['suns']
     
     def get_player_new_suns_this_turn(self, player):
-        return self.__players[player]['new_suns']
+        return self._players[player]['new_suns']
+    
     
     # ------------- #
     #### Apply Actions ####
     # ------------- # 
     def player_buy_tree(self, player_num, size):
-        player = self.__players[player_num]
+        player = self._players[player_num]
         cost = player['store'].get_cost(size)
 
         if cost == np.inf:           # none left
@@ -283,7 +304,7 @@ class GameBoard:
         if tree.size not in [0,1,2]:
             raise ValueError('Invalid Tree Size. Can Only grow trees of size 0, 1, or 2')
         
-        player = self.__players[player_num]
+        player = self._players[player_num]
         if player['inventory'].num_available_trees(tree.size + 1) == 0:
             raise OutOfStockException(f'Cannot grow a tree of size {tree.size} without a tree ' + \
                                       f'of size {tree.size + 1} in inventory. Please buy a tree first')
@@ -293,9 +314,9 @@ class GameBoard:
             raise InsufficientSunsException('Not enough suns to place tree.')
         
         position = tree.position
-        self.__remove_tree(tree)
+        self._remove_tree(tree)
         replacement_tree:Tree = player['inventory'].remove_tree(tree.size + 1)
-        self.__add_tree(replacement_tree, position)
+        self._add_tree(replacement_tree, position)
         replacement_tree.set_grown_flag()
 
         player['suns'] -= cost
@@ -307,16 +328,16 @@ class GameBoard:
         if tree.size != 3:
             raise ValueError('Tree size must be 3 in order to harvest')
         
-        player = self.__players[player_num]
+        player = self._players[player_num]
         
         cost = tree.cost_to_grow()          # should be 4
         if player['suns'] < cost:
             raise InsufficientSunsException('Not enough suns to harvest tree.')
         
         position = tree.position
-        self.__remove_tree(tree)
-        soil_richness = self.__soil_richness[*position]
-        player['points'] += self.__points_bank.claim_points(soil_richness)
+        self._remove_tree(tree)
+        soil_richness = self._soil_richness[*position]
+        player['points'] += self._points_bank.claim_points(soil_richness)
 
     def player_plant_seed(self, player_num, parent:Tree, position:tuple):
         if parent.player != player_num:
@@ -328,7 +349,7 @@ class GameBoard:
                                                  'from it this turn')
         
         # check player inventory and suns
-        player = self.__players[player_num]
+        player = self._players[player_num]
 
         if player['inventory'].num_available_trees(size=0) == 0:
             raise OutOfStockException('No seeds available to plant in inventory. Please buy a seed first.')
@@ -344,7 +365,7 @@ class GameBoard:
         
         # plant the seed
         seed:Tree = player['inventory'].remove_tree(size=0)
-        self.__add_tree(seed, position)
+        self._add_tree(seed, position)
         seed.set_grown_flag()
         parent.set_grown_flag()
         player['suns'] -= cost
@@ -354,18 +375,18 @@ class GameBoard:
         if position not in possible_first_turn_spaces:
             raise ValueError('Not a valid board space for initial placement')
         
-        if self.__tree_board[*position] > -1:
+        if self._tree_board[*position] > -1:
             raise ValueError('Board Space already occupied')
         
-        player = self.__players[player_num]
+        player = self._players[player_num]
         tree = player['inventory'].remove_tree(size=1)
-        self.__add_tree(tree, position)
+        self._add_tree(tree, position)
 
     def print_boards(self):
         print('Tree Sizes:')
-        print(self.__tree_board, '\n')
+        print(self._tree_board, '\n')
         print('Player Occupancies')
-        print(self.__player_board, '\n')
+        print(self._player_board, '\n')
 
 
 

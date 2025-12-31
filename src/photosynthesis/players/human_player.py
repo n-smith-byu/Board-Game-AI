@@ -1,11 +1,11 @@
 from ...board_game import HumanPlayer
-from ..game_board import BoardSummary
+from ..game_board import PlayerGameState
 
 class PhotosynthesisHumanPlayer(HumanPlayer):
     def __init__(self, player_name=None):
         super(PhotosynthesisHumanPlayer, self).__init__(player_name=player_name)
 
-    def choose_move(self, state:BoardSummary):
+    def choose_move(self, state:PlayerGameState):
         move_chosen = False
         possible_moves_str = [{str(action)} for action in state.available_actions]
         while not move_chosen:

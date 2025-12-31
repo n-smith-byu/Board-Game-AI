@@ -7,11 +7,11 @@ from typing import Type
 
 
 class WaitingRoom:
-    def __init__(self, GameClass: Type[BoardGame]):
+    def __init__(self, game_class: Type[BoardGame]):
         
-        self.game_class = GameClass
-        self.human_player_class: Type[HumanPlayer] = GameClass.get_human_player_class()
-        self.ai_player_class: Type[AIPlayer] = GameClass.get_ai_player_class()
+        self.game_class = game_class
+        self.human_player_class: Type[HumanPlayer] = game_class.get_human_player_class()
+        self.ai_player_class: Type[AIPlayer] = game_class.get_ai_player_class()
 
         self.__num_bots: int = 0
         self.__num_humans: int = 0
@@ -24,7 +24,7 @@ class WaitingRoom:
             raise TooManyPlayersException(self.game_class.get_max_num_players())
         
         unique_key = str(uuid.uuid4())
-        self.__players.append(self.human_player_class(player_name=player_name))
+        self.__players.append(self.human_player_class(player_name=player_name, **kwargs))
         self.__player_keys[unique_key] = self.__players[-1]
         self.__num_humans += 1
 

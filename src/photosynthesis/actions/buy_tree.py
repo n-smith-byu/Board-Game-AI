@@ -3,14 +3,14 @@ from ._action import Action
 class BuyTree(Action):
     def __init__(self, player_num, size):
         super(BuyTree, self).__init__(player_num)
-        self.__size = size
+        self._size = size
 
     @property
     def size(self):
-        return self.__size
+        return self._size
     
     def __str__(self):
-        return f"('buy_tree', size={self.__size})"
+        return f"('buy_tree', size={self._size})"
     
     def sort_key(self):
-        return (super().sort_key(), 0, self.__size)
+        return (super().sort_key(), 0, self._size)

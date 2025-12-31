@@ -1,18 +1,19 @@
 import torch
 import torch.nn as nn
 
-class GraphCNN(nn.Module):
-    def __init__(self, in_dim, out_dim):
-        super(GraphCNN, self).__init__()
-        self.in_dim = in_dim
-        self.out_dim = out_dim
+class CustomGraphCNN(nn.Module):
+    def __init__(self, in_dim, out_dim, A):
+        super(CustomGraphCNN, self).__init__()
+        
+        A_tilde = A + torch.eye(A.shape[0])
+        D_tilde = torch.sum(A_tilde, axis=1).reshape((-1, 1))
+        self.register_buffer('A_norm', A_tilde / D_tilde, persistent=False)
 
         self.W = nn.Linear(in_dim, out_dim, dtype=torch.float32)
         self.W_self = nn.Linear(in_dim, out_dim, dtype=torch.float32)
 
-    def forward(self, X, A):
-        A_tilde = A + torch.eye(A.shape[0])
-        conv = A_tilde @ X / torch.sum(A_tilde, axis=1).reshape((A_tilde.shape[0],1))
+    def forward(self, X):
+        conv = self.A_norm @ X
         new_features = self.W(conv) + self.W_self(X)
 
         return new_features
@@ -26,16 +27,16 @@ class PhotosynthesisQModel(nn.Module):
         self.num_turns = num_turns
         vec_dim = 4*num_players
 
-        self.sigma = nn.ReLU()
+        self.sigma = nn.LeakyReLU()
 
-        self.player_tree_1 = GraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.player_tree_2 = GraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.player_tree_3 = GraphCNN(in_dim=vec_dim, out_dim=vec_dim)
+        self.player_tree_1 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
+        self.player_tree_2 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
+        self.player_tree_3 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
         self.player_tree_4 = nn.Linear(in_features=vec_dim, out_features=8)
 
-        self.sun_influence_1 = GraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.sun_influence_2 = GraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.sun_influence_3 = GraphCNN(in_dim=vec_dim, out_dim=vec_dim)
+        self.sun_influence_1 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
+        self.sun_influence_2 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
+        self.sun_influence_3 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
         self.sun_influence_4 = nn.Linear(in_features=vec_dim, out_features=8)
 
         self.lin3 = nn.Linear(in_features=8, out_features=8)
