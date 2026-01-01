@@ -1,7 +1,7 @@
-from .game import PhotosynthesisGame
-from .game_board import *
+from .game import PhotosynthesisGame, PlayerGameState
+from .game_board import PlayerInventory
 from .players import *
 from . import actions
 
-__all__ = ['PhotosynthesisGame', 'PlayerInventory', 'PlayerStore', 'Tree', 'actions',
-           'AIPlayer', 'HumanPlayer']
+__all__ = ['PhotosynthesisGame', 'PlayerGameState', 'PlayerInventory', 'PlayerStore', 
+           'Tree', 'actions', 'AIPlayer', 'HumanPlayer']

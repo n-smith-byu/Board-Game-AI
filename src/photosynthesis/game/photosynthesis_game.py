@@ -1,5 +1,6 @@
 from ..players import RLPlayer, HumanPlayer
-from ..game_board import GameBoard, PlayerGameState
+from ..game_board import GameBoard
+from .game_state import PlayerGameState
 from ..actions import BuyTree, PlantSeed, GrowTree, HarvestTree, PassTurn, InitialPlacement
 from src import board_game as bg
 

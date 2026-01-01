@@ -15,9 +15,12 @@ class PlayerGameState:
         self.tree_board = game_board.get_tree_board()
 
         self.player_suns = game_board.get_player_suns(player_num)
+        self.player_points = game_board.get_player_score(player_num)
         self.player_new_suns = game_board.get_player_new_suns_this_turn(player_num)
         self.player_stores = game_board.get_player_stores()
         self.player_inventories = game_board.get_player_inventories()
+        self.all_player_suns = [game_board.get_player_suns(ind) for ind in range(num_players)]
+        self.all_player_points = [game_board.get_player_score(ind) for ind in range(num_players)]
 
         self.sun_pos = game_board.get_sun_pos()
         self.total_game_turns = total_game_turns

@@ -49,6 +49,4 @@ class PhotoynthesisValuePolicyModel(torch.Module):
         x3 = self.board_gcn_3(board, adj_mat)
         x3 = self.sigma(x3)
 
-        val = self.linear(x3)
-
         return policy, val

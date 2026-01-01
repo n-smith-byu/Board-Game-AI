@@ -266,7 +266,7 @@ class GameBoard:
     def get_player_stores(self):
         stores = {}
         for player_ind, state in self._players.items():
-            store: PlayerStore= state['inventory']
+            store: PlayerStore= state['store']
             stores[player_ind] = {}
             for size in [0,1,2,3]:
                 stores[player_ind][size] = store.get_num_available(size)

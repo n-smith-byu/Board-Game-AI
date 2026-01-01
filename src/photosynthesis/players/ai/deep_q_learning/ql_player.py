@@ -1,9 +1,10 @@
 from src.board_game.players import AIPlayer
 from .q_model import PhotosynthesisQModel
-from photosynthesis.game import PhotosynthesisGame
-from photosynthesis.game_board import GameBoard, PlayerGameState
+from photosynthesis.game import PhotosynthesisGame, PlayerGameState
+from photosynthesis.game_board import GameBoard
 from photosynthesis.actions import *
 from photosynthesis.players.ai import RandomPlayer
+from .state_tensor import PlayerStateTensor
 
 from collections import defaultdict
 from tqdm import tqdm
@@ -28,6 +29,7 @@ class Actions(IntEnum):
     INIT = 8
  
 class PhotosynthesisRLPlayer(AIPlayer):
+        
     def __init__(self, num_players, player_num=None, temperature=0,
                  directory=os.path.join('src','photosynthesis','players','ai','deep_q_learning','models')):
         super(PhotosynthesisRLPlayer, self).__init__(player_num)
@@ -98,119 +100,16 @@ class PhotosynthesisRLPlayer(AIPlayer):
     
     # - - Generating State Vector - - 
 
-    def generate_state_vec(self, state: PlayerGameState):
-        # Starting inds for each section of the state vector
-        FIRST_PLAYER_TOKEN = 0           # who has the first player token that round. 
-        PLAYER_TREES = FIRST_PLAYER_TOKEN + self.game_num_players     # each player's trees on the board (encoded by size)
-
-        TREE_GROWTH = PLAYER_TREES + self.game_num_players * 4      # whether each player has a tree/seed in 
-                                                                     # their inventory that can grow a certain 
-                                                                     # space.
-        SPACE_MOVE_USED = TREE_GROWTH + self.game_num_players       # whether a space's action has already been used 
-                                                                     # this turn.
-        SUN_CHANNELS = SPACE_MOVE_USED + 1            # which spaces get sun the next two turns.
-
-        num_channels = SUN_CHANNELS + 2
-        state_vec = torch.zeros((37, num_channels))
-
-        self._calc_first_player_token(state, state_vec, start_ind=FIRST_PLAYER_TOKEN)
-        self._calc_player_trees(state, state_vec, trees_start_ind=PLAYER_TREES)
-        self._calc_possible_tree_growth(state, state_vec, start_ind=TREE_GROWTH)
-
-        return state_vec
-    
-    def _calc_first_player_token(self, state: PlayerGameState, state_vec, start_ind):
-        # Calc position of the player with the first player token relative to this AIPlayer
-        offset = self.player_num
-        
-        relative_first_player_token = (state.first_player_token - offset) % self.game_num_players
-        state_vec[start_ind + relative_first_player_token] = 1.0
-
-    def _calc_player_trees(self, state: PlayerGameState, state_vec, start_ind):
-        tree_board = state.tree_board
-        player_board = state.player_positions
-        offset = self.player_num
-
-        for (i,j), board_space in self.coords_to_node_ind_map.items():
-            tree_size = tree_board[i, j]
-            if tree_size >= 0:
-                player_ind = player_board[i,j]
-                player_relative_ind = (player_ind - offset) % self.game_num_players
-                state_vec[board_space][start_ind + 4*player_relative_ind + tree_size] = 1.0
-    
-    def _calc_possible_tree_growth(self, state: PlayerGameState, state_vec, start_ind):
-        tree_board = state.tree_board
-        player_board = state.player_positions
-        offset = self.player_num
-
-        player_has_seeds = state.player_inventories[player_ind][0] > 0
-        for (i,j), board_space in self.coords_to_node_ind_map.items():
-            tree_size = tree_board[i,j]
-            if tree_size >= 0:                  # if player has a tree there
-                player_ind = player_board[i,j]
-                if tree_size == 3 or state.player_inventories[player_ind][tree_size + 1] > 0:
-                    player_relative_ind = (player_ind - offset) % self.game_num_players
-                    state_vec[board_space][start_ind + player_relative_ind] = 1.0
-            elif tree_size == -1 and player_has_seeds:       # if an empty board space and player has seeds
-                # board spaces one, two, or three away
-                ones = self.adj_mat[:, board_space]     
-                twos = self.adj_mat_2[:, board_space]
-                threes = self.adj_mat_3[:, board_space]
-
-                for k in range(len(ones)):
-                    can_plant_seed = False
-                    i_, j_ = self.node_ind_to_coords_map[k]
-                    if ones[k] > 0 and tree_board[i_, j_] >= 1:
-                        can_plant_seed = True
-                    elif twos[k] > 0 and tree_board[i_, j_] >= 2:
-                        can_plant_seed = True
-                    elif threes[k] > 0 and tree_board[i_, j_] == 3:
-                        can_plant_seed = True
-                    
-                    if can_plant_seed:
-                        player_ind = player_board[i_, j_]
-                        player_relative_ind = (player_ind - offset) % self.game_num_players
-                        state_vec[k][start_ind + player_relative_ind] = 1.0
-
-    def _calc_space_move_used(self, state_vec, start_ind):
-        used_spaces = []
-        for action in self.turn_history:
-            if isinstance(action, PlantSeed):
-                used_spaces.append(action.position)
-            elif isinstance(action, (GrowTree, HarvestTree)):
-                used_spaces.append(action.tree.position)
-
-        for coords in used_spaces:
-            board_space_ind = self.coords_to_node_ind_map[coords]
-            state_vec[board_space_ind][start_ind] = 1.0
-
-    def _calc_expected_sunlight(self, state: PlayerGameState, state_vec, start_ind):
-        for i in range(2):
-            sun_pos = state.sun_pos + i + 1
-            shadows = self._simulate_shadows(state.tree_board, sun_pos)
-            state_vec[:, start_ind + 1] = 1.0       # assume everywhere gets sun to start
-            for (i,j), board_space_ind in self.coords_to_node_ind_map.items():
-                if shadows[i,j] == 1:
-                    state_vec[board_space_ind][start_ind + i] = 0.0     # space expected to be in shadow in (i + 1) turns
-
-    def _simulate_shadows(self, tree_board, sun_pos):
-        sun_directions = GameBoard.get_sun_direction_vecs()
-        shadows = GameBoard.get_empty_board(zeros=True)
-        for (i,j), board_space_ind in self.coords_to_node_ind_map.items():
-            if tree_board[i,j] > 0:
-                this_tree_pos = np.array([i,j])
-                sun_direction = sun_directions[sun_pos]
-                for num_spaces_away in [1,2,3]:
-                    neighbor_space = tuple(this_tree_pos - num_spaces_away*sun_direction)
-                    if neighbor_space not in self._valid_board_spaces:
-                        break
-
-                    neighbor_tree_size = self._tree_board[*neighbor_space]
-                    if neighbor_tree_size >= num_spaces_away and neighbor_tree_size >= tree.size:
-                        return True
-            
-        return False
-                        
+    def generate_state_vec(self, game_state: PlayerGameState):
+        return PlayerStateTensor(
+            game_state, 
+            self.turn_history,
+            self.coords_to_node_ind_map, 
+            self.node_ind_to_coords_map,
+            self.adj_mat, 
+            self.adj_mat_2, 
+            self.adj_mat_3
+            )
 
     def map_action_to_vector(self, action):
         """
@@ -349,8 +248,8 @@ class PhotosynthesisRLPlayer(AIPlayer):
                              for action in state.available_actions])    # batch actions together
         
         # calculate Q vals
-        state_vec = self.generate_state_vec(state)
-        Q_vals = self.q_model(state_vec, actions)
+        state_tensor = self.generate_state_vec(state).get_tensor()
+        Q_vals = self.q_model(state_tensor, actions)
 
         # make a choice (epsilon greedy if training)
         if self.training and np.random.uniform(0,1) < self.epsilon:
