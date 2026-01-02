@@ -1,3 +1,5 @@
+from .state_tensor import PlayerStateTensor
+
 import torch
 import torch.nn as nn
 
@@ -14,9 +16,9 @@ class CustomGraphCNN(nn.Module):
 
     def forward(self, X):
         conv = self.A_norm @ X
-        new_features = self.W(conv) + self.W_self(X)
 
-        return new_features
+        return self.W(conv) + self.W_self(X)
+
 
 class PhotosynthesisQModel(nn.Module):
 
@@ -25,68 +27,79 @@ class PhotosynthesisQModel(nn.Module):
 
         self.num_players = num_players
         self.num_turns = num_turns
-        vec_dim = 4*num_players
+        STATE_DIM = 24*num_players + 10
+        ACTION_DIM = 78
+
+        # state encoder
+        self.state_input = nn.Linear(in_features=STATE_DIM, out_dim=128)
+        self.board_gcn_1 = CustomGraphCNN(in_dim=STATE_DIM, out_dim=128)
+        self.board_gcn_2 = CustomGraphCNN(in_dim=128, out_dim=128)
+        self.board_gcn_3 = CustomGraphCNN(in_dim=128, out_dim=128)
+        self.board_gcn_4 = CustomGraphCNN(in_dim=128, out_dim=128)
+        self.board_gcn_5 = CustomGraphCNN(in_dim=128, out_dim=128)
+        self.state_final = nn.Linear(in_features=128, out_features=64)
+
+        self.bn_state_in = nn.BatchNorm1d(num_features = 128)
+        self.bn_gcn_1 = nn.BatchNorm1d(num_features = 128)
+        self.bn_gcn_2 = nn.BatchNorm1d(num_features = 128)
+        self.bn_gcn_3 = nn.BatchNorm1d(num_features = 128)
+        self.bn_gcn_4 = nn.BatchNorm1d(num_features = 128)
+        self.bn_gcn_5 = nn.BatchNorm1d(num_features = 128)
+        self.bn_state_f = nn.BatchNorm1d(num_features = 64)
+
+        # action encoder (each state has a batch of actions for all possible actions)
+        self.action_input = nn.Linear(in_features=ACTION_DIM, out_features=32)
+        self.bn_action_in = nn.BatchNorm1d(num_features = 32)
+
+        # combined
+        self.lin5 = nn.Linear(in_features=96, out_features=32)
+        self.lin6 = nn.Linear(in_features=32, out_features=1)
 
         self.sigma = nn.LeakyReLU()
 
-        self.player_tree_1 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.player_tree_2 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.player_tree_3 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.player_tree_4 = nn.Linear(in_features=vec_dim, out_features=8)
 
-        self.sun_influence_1 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.sun_influence_2 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.sun_influence_3 = CustomGraphCNN(in_dim=vec_dim, out_dim=vec_dim)
-        self.sun_influence_4 = nn.Linear(in_features=vec_dim, out_features=8)
+    def forward(self, state: PlayerStateTensor, actions: torch.Tensor):
+        device = self.board_gcn_1.A_norm.device
+        state_vec = state.get_tensor()
+        state_vec.device(device)
 
-        self.lin3 = nn.Linear(in_features=8, out_features=8)
-        self.lin4 = nn.Linear(in_features=8, out_features=1)
-
-        sun_encoding_size = 6
-        player_suns_size = 1
-        remaining_turns_size = 1
-        action_size = 78
-        prev_output_size=74
-        total_size = prev_output_size + sun_encoding_size + player_suns_size + \
-            remaining_turns_size + num_players + action_size
+        state_vec = self.sigma(self.bn_state_in(self.state_input(state)))
         
-        self.lin5 = nn.Linear(in_features=total_size, out_features=16)
-        self.lin6 = nn.Linear(in_features=16, out_features=1)
+        # GCN 1 with Skip
+        identity = state_vec
+        state_vec = self.sigma(self.bn_gcn_1(self.board_gcn_1(state_vec)))
+        state_vec = state_vec + identity # Residual connection
+        
+        # GCN 2 with Skip
+        identity = state_vec
+        state_vec = self.sigma(self.bn_gcn_2(self.board_gcn_2(state_vec)))
+        state_vec = state_vec + identity
 
+        # GCN 3 with Skip
+        identity = state_vec
+        state_vec = self.sigma(self.bn_gcn_3(self.board_gcn_3(state_vec)))
+        state_vec = state_vec + identity
 
-    def forward(self, state, actions):
-        (player_enc, player_trees_enc, tree_influence, sun_influence_next_turn, 
-                sun_pos_enc, player_suns, remaining_turns_enc) = state
+        # GCN 4 with Skip
+        identity = state_vec
+        state_vec = self.sigma(self.bn_gcn_4(self.board_gcn_4(state_vec)))
+        state_vec = state_vec + identity
 
-        x1 = self.player_tree_1(X = player_trees_enc, A = tree_influence)
-        x1 = self.sigma(x1)
-        x1 = self.player_tree_2(X = x1, A = tree_influence)
-        x1 = self.sigma(x1)
-        x1 = self.player_tree_3(X = x1, A = tree_influence)
-        x1 = self.sigma(x1)
-        x1 = self.player_tree_4(x1)
+        # GCN 5 with Skip
+        identity = state_vec
+        state_vec = self.sigma(self.bn_gcn_5(self.board_gcn_5(state_vec)))
+        state_vec = state_vec + identity
 
-        x2 = self.sun_influence_1(X = player_trees_enc, A = sun_influence_next_turn)
-        x2 = self.sigma(x2)
-        x2 = self.sun_influence_2(X = x2, A = sun_influence_next_turn)
-        x2 = self.sigma(x2)
-        x2 = self.sun_influence_3(X = x2, A = sun_influence_next_turn)
-        x2 = self.sigma(x2)
-        x2 = self.sun_influence_4(x2)
+        # State Embedding Final
+        state_vec = self.sigma(self.bn_state_f(self.state_final(state_vec)))
 
-        x3 = torch.concat([x1, x2], dim=0)
-        x3 = self.lin3(x3)
-        x3 = self.sigma(x3)
+        # Action Embedding Final
+        state_batch, action_batch, num_features = actions.shape
+        action_vec = self.sigma(self.bn_action_in(self.action_input(actions)))
 
-        x4 = self.lin4(x3)
+        # TODO: combine state and actions to predict Q-Values
 
-        x4 = torch.concat([x4.flatten(), player_suns, sun_pos_enc, player_enc,
-                          remaining_turns_enc], dim=0)
-        x4 = torch.concat([x4.unsqueeze(0).expand(actions.shape[0], -1), actions], dim=1)
-        x5 = self.lin5(x4)
-        x6 = self.lin6(x5)
-
-        return x6.flatten()
+        
 
 
 

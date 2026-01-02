@@ -30,8 +30,8 @@ class Actions(IntEnum):
  
 class PhotosynthesisRLPlayer(AIPlayer):
         
-    def __init__(self, num_players, player_num=None, temperature=0,
-                 directory=os.path.join('src','photosynthesis','players','ai','deep_q_learning','models')):
+    def __init__(self, num_players, player_num=None, temperature=0.0,
+                 directory: str = os.path.join('src','photosynthesis','players','ai','deep_q_learning','models')):
         super(PhotosynthesisRLPlayer, self).__init__(player_num)
 
         self.game_num_players = num_players

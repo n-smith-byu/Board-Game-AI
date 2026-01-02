@@ -38,9 +38,11 @@ class PlayerStateTensor:
         self.PLAYER_STORES_ENCODING = self.PLAYER_STORES_RAW_NUM + self.num_players*4
 
         # mark how many suns each player has out of total possible suns
+        # [n channels]
         self.PLAYER_SUNS = self.PLAYER_STORES_ENCODING + self.num_players * 13
 
-        # mark how many points a player has
+        # mark how many points each player has
+        # [n channels]
         self.PLAYER_SCORES = self.PLAYER_SUNS + self.num_players
 
         # mark, for each space, if an action has already been done this turn
@@ -56,6 +58,7 @@ class PlayerStateTensor:
         self.SUNLIGHT_CHANNELS = self.SUN_POS + 6   
 
         # mark how many turns are left in the game, out of total rounds.
+        # [1 channel]
         self.GAME_ROUND = self.SUNLIGHT_CHANNELS + 2
 
         self.coords_to_node_ind_map: dict[tuple, int] = coords_to_node_ind_map
