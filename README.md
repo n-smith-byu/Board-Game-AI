@@ -13,4 +13,6 @@ Based on the game by [Blue Orange Games](https://www.blueorangegames.com/).
 * **Status:** Implementing Deep Q Learning w/ Monte Carlo Search Tree
 * **Tech Stack:** Python
 
+* *Here is an alternate take where I show how to reduce the rules to a set of Linear Constraints for a Linear Programming Problem:*
+https://drive.google.com/file/d/1AuCRP43RMnCymF5TdgJr_O9453uvWKZJ/view
 ---
