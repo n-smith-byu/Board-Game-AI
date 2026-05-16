@@ -1,0 +1,11 @@
+[project]
+name = "board-game"
+version = "0.1.0"
+description = "Core logic for board game AI agents"
+authors = [{name = "Nicholas Smith", email = "nicholas.smith0014@gmail.com"}]
+requires-python = ">=3.12,<3.15"
+
+dependencies = []
+
+[tool.poetry]
+package-mode = true  

@@ -1,0 +1,13 @@
+.venv/
+.vscode/
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pt
+*.pth
+*.path
+*.h5
+*.model
+*.egg-info
