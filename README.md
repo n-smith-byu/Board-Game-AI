@@ -1,5 +1,6 @@
 # Board Game AI 
-![Status: Active Development](https://img.shields.io/badge/Status-Active_Development-green)
+![Status: Active Development](https://img.shields.io/badge/Status-Active_Development-green) \
+[![Python Version](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/downloads/)
 
 Building AI Agents to play various board games using Reinforcement Learning.
 
