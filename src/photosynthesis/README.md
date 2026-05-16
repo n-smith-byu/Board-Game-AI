@@ -2,6 +2,11 @@
 
 [`Board-Game-AI\`](https://github.com/n-smith-byu/Board-Game-AI/)[`src\photosynthesis\`](https://github.com/n-smith-byu/Board-Game-AI/tree/main/src/photosynthesis)
 
+![Status: Active Development](https://img.shields.io/badge/Status-Active_Development-green) \
+[![Python Version](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/downloads/)
+
+---
+
 Implementation of an AI to play Photosynthesis by [Blue Orange Games](https://www.blueorangegames.com/).
 
 > **Disclaimer:** 
