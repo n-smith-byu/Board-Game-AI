@@ -40,8 +40,9 @@ Based on the Photosynthesis game by [Blue Orange Games](https://www.blueorangega
 * **Tech Stack:** Python
 
 * **Alternate Method:**
-    * Here is a write-up for an alternate method where I show how to reduce the rules to a set of Linear Constraints and set up a Linear Programming Problem.
-    * Link: [Project Write-Up](https://n-smith-byu.github.io/Board-Game-AI/src/photosynthesis/docs/CS412_Final_Project_Photosynthesis_Linear_Programming_WriteUp.pdf)
+    * Here is a write-up for an alternate method where I show how to reduce the rules to a set of Linear Constraints and create a Linear Programming Problem.
+    * Link:
+      * [`CS412_Final_Project_Photosynthesis_Linear_Programming.pdf`](https://n-smith-byu.github.io/Board-Game-AI/src/photosynthesis/docs/CS412_Final_Project_Photosynthesis_Linear_Programming.pdf)
 
 ---
 
