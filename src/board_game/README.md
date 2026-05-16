@@ -1,5 +1,11 @@
 # 📦 Board Game Package
+
 [`Board-Game-AI\`](https://github.com/n-smith-byu/Board-Game-AI/)[`src\board_game\`](https://github.com/n-smith-byu/Board-Game-AI/tree/main/src/board_game)
+
+![Status: Active Development](https://img.shields.io/badge/Status-Active_Development-green) \
+[![Python Version](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/downloads/)
+
+---
 
 A base package with classes for making Board Game implementation easier.
 - `BoardGame`: The base Board Game class. Holds logic for adding and removing players and starting the game. 
