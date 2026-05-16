@@ -7,7 +7,7 @@
 
 ---
 
-Implementation of an AI to play Photosynthesis by [Blue Orange Games](https://www.blueorangegames.com/).
+Implementation of an AI to play Photosynthesis by [Blue Orange Games](https://www.blueorangegames.com/games/photosynthesis).
 
 > **Disclaimer:** 
 > This project is an independent research endeavor focused on Artificial Intelligence and is not affiliated with Blue Orange Games. The game 'Photosynthesis' is a trademark of Blue Orange Games. This implementation is intended for educational and research purposes only.
