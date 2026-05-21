@@ -9,8 +9,8 @@
 
 Implementation of an AI to play Photosynthesis by [Blue Orange Games](https://www.blueorangegames.com/games/photosynthesis).
 
-> **Disclaimer:** 
-> This project is an independent research endeavor focused on Artificial Intelligence and is not affiliated with Blue Orange Games. The game 'Photosynthesis' is a trademark of Blue Orange Games. This implementation is intended for educational and research purposes only.
+> **Disclaimer:**
+> This project is an independent research endeavor focused on Artificial Intelligence and is not affiliated with Blue Orange Games. The game *Photosynthesis* is a trademark of Blue Orange Games. This implementation is intended for educational and research purposes only.
 
 ### Quick Start
 
@@ -58,7 +58,8 @@ There are three available types of AI player in the works.
 
 If you are using the built-in HumanPlayer, then you will see a setup like this on your turn:
 
-> **Note:** Make sure you have used `game.run(display=True)`, or you will not see the two boards each turn. 
+> [!Tip]
+> Make sure you have used `game.run(display=True)`, or you will not see the two boards each turn. 
 
 ```
 Player3's Turn
