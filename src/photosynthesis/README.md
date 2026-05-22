@@ -58,7 +58,7 @@ There are three available types of AI player in the works.
 
 If you are using the built-in HumanPlayer, then you will see a setup like this on your turn:
 
-> [!Tip]
+> [!Important]
 > Make sure you have used `game.run(display=True)`, or you will not see the two boards each turn. 
 
 ```
